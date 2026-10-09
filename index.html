@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Фокус-Сфера</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --accent: #d4af37;
+      --text: #f0f6fc;
+      --muted: #8b949e;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; }
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .slot-tag { color: var(--accent); font-weight: 700; font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; line-height: 1.7; }
+    h1 { font-size: 1.35rem; margin-bottom: 8px; color: #fff; }
+    .meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .content { font-size: 0.95rem; color: #c9d1d9; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="slot-tag" id="category">Перезагрузка внимания</div>
+    </div>
+    <div class="card">
+      <h1 id="title">Загрузка статьи...</h1>
+      <div class="meta" id="meta">15 минут чтения • Материалы блокнота</div>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    // Читаем статью из параметров ссылки
+    const urlParams = new URLSearchParams(window.location.search);
+    const title = urlParams.get('title') || "Практика осознанного присутствия";
+    const text = urlParams.get('text') || "Отложите телефон на пару минут, сделайте глубокий вдох и верните внимание в настоящий момент.";
+    const cat = urlParams.get('cat') || "Фокус дня";
+
+    document.getElementById('title').textContent = title;
+    document.getElementById('content').textContent = text;
+    document.getElementById('category').textContent = cat;
+  </script>
+</body>
+</html>
