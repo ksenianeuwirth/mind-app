@@ -11,7 +11,7 @@ VERCEL_URL = os.getenv("VERCEL_URL")
 
 # Вставьте сюда ваш ID (и позже ID мамы и дочки через запятую):
 CHAT_IDS = [
-    8206790033,  # <-- ЗАМЕНИТЕ НА ВАШИ ЦИФРЫ ИЗ @userinfobot
+8206790033
 ]
 
 TOPICS = {
