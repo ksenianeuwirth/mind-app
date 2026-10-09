@@ -13,16 +13,36 @@
       --text: #f0f6fc;
       --muted: #8b949e;
       --border: #30363d;
+      --btn-bg: #21262d;
+      --btn-hover: #30363d;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; }
-    .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; }
+    .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
     .header { display: flex; justify-content: space-between; align-items: center; }
     .slot-tag { color: var(--accent); font-weight: 700; font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; line-height: 1.7; }
     h1 { font-size: 1.35rem; margin-bottom: 8px; color: #fff; }
     .meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
     .content { font-size: 0.95rem; color: #c9d1d9; white-space: pre-line; }
+    .actions { display: flex; justify-content: center; margin-top: 10px; }
+    .reload-btn {
+      background: var(--btn-bg);
+      border: 1px solid var(--accent);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      width: 100%;
+      justify-content: center;
+    }
+    .reload-btn:active { transform: scale(0.98); background: var(--btn-hover); }
   </style>
 </head>
 <body>
@@ -31,9 +51,12 @@
       <div class="slot-tag" id="category">Перезагрузка внимания</div>
     </div>
     <div class="card">
-      <h1 id="title">Загрузка статьи...</h1>
+      <h1 id="title">Загрузка практики...</h1>
       <div class="meta" id="meta">15 минут чтения • Материалы блокнота</div>
       <div class="content" id="content"></div>
+    </div>
+    <div class="actions">
+      <button class="reload-btn" onclick="loadRandomArticle()">🎲 Другая практика прямо сейчас</button>
     </div>
   </div>
 
@@ -44,15 +67,53 @@
       tg.expand();
     }
 
-    // Читаем статью из параметров ссылки
-    const urlParams = new URLSearchParams(window.location.search);
-    const title = urlParams.get('title') || "Практика осознанного присутствия";
-    const text = urlParams.get('text') || "Отложите телефон на пару минут, сделайте глубокий вдох и верните внимание в настоящий момент.";
-    const cat = urlParams.get('cat') || "Фокус дня";
+    // База техник из конспекта для чтения по требованию
+    const library = [
+      {
+        cat: "Управление кадрами",
+        title: "Калибровка активного режима",
+        body: "Внимание человека устроено так, что при отсутствии осознанного вектора оно мгновенно соскальзывает в чужие сценарии и пассивное ожидание.\n\nКогда вы ловите себя на тревоге или зависании, срабатывает шаблон улитки. Чтобы выйти из него, не нужно бороться с текущим моментом силой воли — достаточно переключиться в активный режим.\n\nМикропрактика:\n1. Зафиксируйте точку присутствия: осознайте, где вы сейчас сидите или стоите.\n2. Активируйте внутреннее намерение: перестаньте надеяться на удачное стечение обстоятельств.\n3. Сформулируйте целевой кадр: мысленно подсветите и утвердите образ желаемого завершения ближайшего часа."
+      },
+      {
+        cat: "Антидот против мыслешейкера",
+        title: "Остановка ментального шторма",
+        body: "Ум — это механизм, запрограммированный на постоянное выживание и сканирование угроз. Когда нерешенных мелких задач становится слишком много, он раскручивает 'мыслешейкер' — тревожное вращение мыслей, парализующее волю.\n\nПытаться переспорить ум бесполезно: он питается вниманием. Снятие внимания с воображаемой проблемы сразу обесточивает внутренний конфликт.\n\nМикропрактика:\n1. Поймайте себя на крутящейся мысли о проблеме.\n2. Скажите уму: 'Мы не можем решить это прямо сейчас в голове. Отпускаем контроль'.\n3. Переведите луч внимания на любое физическое действие: сделайте глоток воды, помойте чашку или выпишите на бумагу одно конкретное микродействие."
+      },
+      {
+        cat: "Декомпрессия мозга",
+        title: "Техника открытого фокуса",
+        body: "Постоянная концентрация на экране телефона удерживает зрительный анализатор в узком фокусе. В мозг идет скрытый сигнал: 'мы в опасности, держи напряжение'.\n\nРасширение угла зрения мгновенно передает сигнал парасимпатической системе, активируя альфа-ритмы восстановления.\n\nМикропрактика:\n1. Поднимите взгляд и выберите предмет перед собой.\n2. Не переводя зрачков, начните замечать границы помещения справа, слева, сверху и снизу.\n3. Почувствуйте объем воздуха в комнате и физическое пространство между вашим телом и экраном. Дышите свободно 2 минуты."
+      },
+      {
+        cat: "Перепрошивка шаблона",
+        title: "Закон Хебба и разрыв автоматизма",
+        body: "Нейроны, которые активируются вместе, соединяются вместе. Если каждый раз при спаде энергии рука сама тянется к ленте новостей, эта привычка закрепляется на физическом уровне мозга.\n\nЧтобы проложить новую нейронную колею, не нужно запрещать себе отдых — нужно подменить автоматическую реакцию осознанным ритуалом.\n\nМикропрактика:\n1. В момент импульсивного желания обновить соцсети сделайте паузу на 3 дыхательных цикла.\n2. Примените внутренний стартер: 'Сделать сейчас же' к любому простому делу или встаньте размять плечи.\n3. Закрепите подвижку: отметьте про себя, что вы только что осознанно сломали старый сценарий."
+      }
+    ];
 
-    document.getElementById('title').textContent = title;
-    document.getElementById('content').textContent = text;
-    document.getElementById('category').textContent = cat;
+    function render(cat, title, body) {
+      document.getElementById('category').textContent = cat;
+      document.getElementById('title').textContent = title;
+      document.getElementById('content').textContent = body;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function loadRandomArticle() {
+      const item = library[Math.floor(Math.random() * library.length)];
+      render(item.cat, item.title, item.body);
+    }
+
+    // Первичная загрузка из параметров рассылки либо случайной статьи
+    const urlParams = new URLSearchParams(window.location.search);
+    const pTitle = urlParams.get('title');
+    const pText = urlParams.get('text');
+    const pCat = urlParams.get('cat');
+
+    if (pTitle && pText) {
+      render(pCat || "Фокус дня", pTitle, pText);
+    } else {
+      loadRandomArticle();
+    }
   </script>
 </body>
 </html>
