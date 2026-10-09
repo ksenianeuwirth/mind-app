@@ -1,4 +1,5 @@
 import os
+import time
 import urllib.parse
 from datetime import datetime
 import pytz
@@ -9,9 +10,9 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 VERCEL_URL = os.getenv("VERCEL_URL")
 
-# Вставьте сюда ваш ID (и позже ID мамы и дочки через запятую):
+# Список получателей: укажите ваш персональный ID из @userinfobot
 CHAT_IDS = [
-8206790033
+    123456789,
 ]
 
 TOPICS = {
@@ -27,8 +28,30 @@ def get_current_slot():
     hour = datetime.now(tz).strftime("%H")
     return TOPICS.get(hour, ("Перезагрузка", "Концентрация внимания, выход из ментальных ловушек и ясность ума"))
 
+def generate_content_with_retry(ai_client, prompt):
+    # Список моделей на случай перегрузки одной из них
+    models_to_try = [
+        "gemini-2.5-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-2.5-flash",
+    ]
+    
+    last_error = None
+    for model_name in models_to_try:
+        try:
+            print(f"Попытка генерации через модель: {model_name}...")
+            res = ai_client.models.generate_content(model=model_name, contents=prompt)
+            if res and res.text:
+                return res.text
+        except Exception as e:
+            print(f"Модель {model_name} временно недоступна ({e}). Переключаемся на резервную...")
+            time.sleep(2)
+            last_error = e
+
+    raise last_error
+
 def main():
-    if not CHAT_IDS or CHAT_IDS[0] == 123456789:
+    if not CHAT_IDS:
         print("Ошибка: укажите ваш реальный Telegram Chat ID в списке CHAT_IDS!")
         return
 
@@ -45,8 +68,8 @@ def main():
         "Формат: Первая строка — цепляющий заголовок (без знаков # и звездочек). Далее — структурированный текст с абзацами."
     )
     
-    res = ai_client.models.generate_content(model='gemini-3.8-flash', contents=prompt)
-    lines = res.text.strip().split("\n")
+    raw_text = generate_content_with_retry(ai_client, prompt)
+    lines = raw_text.strip().split("\n")
     title = lines[0].replace("*", "").strip()
     body = "\n".join(lines[1:]).strip()
 
@@ -67,7 +90,8 @@ def main():
             "reply_markup": keyboard
         }
         try:
-            requests.post(url, json=payload, timeout=10)
+            resp = requests.post(url, json=payload, timeout=10)
+            print(f"Отправка на ID {chat_id}: {resp.status_code}")
         except Exception as e:
             print(f"Ошибка отправки пользователю {chat_id}: {e}")
 
