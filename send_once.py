@@ -45,7 +45,7 @@ def main():
         "Формат: Первая строка — цепляющий заголовок (без знаков # и звездочек). Далее — структурированный текст с абзацами."
     )
     
-    res = ai_client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    res = ai_client.models.generate_content(model='gemini-3.8-flash', contents=prompt)
     lines = res.text.strip().split("\n")
     title = lines[0].replace("*", "").strip()
     body = "\n".join(lines[1:]).strip()
