@@ -12,7 +12,7 @@ VERCEL_URL = os.getenv("VERCEL_URL")
 
 # Список получателей: укажите ваш персональный ID из @userinfobot
 CHAT_IDS = [
-    123456789,
+    8206790033,
 ]
 
 TOPICS = {
